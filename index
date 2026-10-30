@@ -1,0 +1,150 @@
+(function () {
+  'use strict';
+
+  var reduced = window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- 1. 导航滚动吸顶（加 --bg 90% 模糊底） ---------- */
+  var nav = document.querySelector('.site-nav');
+  function onScroll() {
+    if (!nav) return;
+    if (window.scrollY > 40) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* ---------- 2. 移动端汉堡菜单 ---------- */
+  var burger = document.querySelector('.hamburger');
+  var mobileMenu = document.querySelector('.mobile-menu');
+  var mobileClose = document.querySelector('.mobile-close');
+  function setMenu(open) {
+    if (!mobileMenu) return;
+    mobileMenu.classList.toggle('open', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+  if (burger) burger.addEventListener('click', function () { setMenu(true); });
+  if (mobileClose) mobileClose.addEventListener('click', function () { setMenu(false); });
+  if (mobileMenu) {
+    mobileMenu.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') setMenu(false);
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') setMenu(false);
+  });
+
+  /* ---------- 3. IntersectionObserver 入场动效 ---------- */
+  var revealEls = document.querySelectorAll('.reveal');
+  if (reduced || !('IntersectionObserver' in window)) {
+    revealEls.forEach(function (el) { el.classList.add('visible'); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- 4. 通用 Tab 切换（首页预览 + 菜单页分类） ---------- */
+  function wireTabs(wrapSelector, tabSelector, panelSelector) {
+    var wrap = document.querySelector(wrapSelector);
+    if (!wrap) return;
+    var tabs = wrap.querySelectorAll(tabSelector);
+    var panels = document.querySelectorAll(panelSelector);
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var key = tab.getAttribute('data-tab');
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle('active', on);
+          t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panels.forEach(function (p) {
+          p.classList.toggle('active', p.getAttribute('data-panel') === key);
+        });
+      });
+    });
+  }
+  wireTabs('.preview-tabs', '.preview-tab', '.preview-panel');
+  wireTabs('.menu-tabs-wrap', '.menu-tab', '.cat-panel');
+
+  /* ---------- 5. 预订表单：校验 + 成功状态（不发请求） ---------- */
+  var form = document.getElementById('reserveForm');
+  if (form) {
+    var success = document.getElementById('successBlock');
+    var required = ['resDate', 'resTime', 'resGuests', 'resName', 'resPhone'];
+
+    function fieldOf(input) {
+      return input.closest('.field');
+    }
+    function mark(input, bad) {
+      var f = fieldOf(input);
+      if (f) f.classList.toggle('invalid', bad);
+    }
+    required.forEach(function (id) {
+      var input = document.getElementById(id);
+      if (!input) return;
+      input.addEventListener('input', function () { mark(input, false); });
+      input.addEventListener('change', function () { mark(input, false); });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var firstBad = null;
+      required.forEach(function (id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        var empty = !input.value || !String(input.value).trim();
+        mark(input, empty);
+        if (empty && !firstBad) firstBad = input;
+      });
+
+      if (firstBad) {
+        firstBad.focus();
+        return;
+      }
+
+      /* 复述所选日期时间人数 */
+      var dateEl = document.getElementById('resDate');
+      var timeEl = document.getElementById('resTime');
+      var guestsEl = document.getElementById('resGuests');
+      var nameEl = document.getElementById('resName');
+
+      var dateText = dateEl.value;
+      if (dateText) {
+        var parts = dateText.split('-');
+        if (parts.length === 3) {
+          dateText = parts[0] + ' 年 ' + Number(parts[1]) + ' 月 ' + Number(parts[2]) + ' 日';
+        }
+      }
+      var timeText = timeEl.options[timeEl.selectedIndex]
+        ? timeEl.options[timeEl.selectedIndex].textContent : '';
+      var guestsText = guestsEl.options[guestsEl.selectedIndex]
+        ? guestsEl.options[guestsEl.selectedIndex].textContent : '';
+
+      var occasions = [];
+      form.querySelectorAll('input[name="occasion"]:checked').forEach(function (cb) {
+        occasions.push(cb.getAttribute('data-label'));
+      });
+
+      var summary = document.getElementById('successSummary');
+      if (summary) {
+        summary.textContent =
+          (nameEl.value ? nameEl.value.trim() + ' · ' : '') +
+          dateText + ' · ' + timeText.trim() + ' · ' + guestsText.trim() +
+          (occasions.length ? ' · ' + occasions.join('、') : '');
+      }
+
+      form.style.display = 'none';
+      if (success) {
+        success.classList.add('show');
+        success.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'center' });
+      }
+    });
+  }
+})();
