@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>鲍山鲍海餐饮 Restoran BSBH — 客家菜 · 粤菜 · 宴会厅 | Seremban</title>
+<meta name="description" content="鲍山鲍海餐饮 Restoran BSBH：芙蓉 Oakland Industrial Park 大型中式宴会厅，客家菜、中国菜、粤菜，可办婚宴、寿宴、公司春茗。每日 11:00–22:00。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./styles.css">
+<!--
+Canvas: 响应式网站（桌面端优先，1240px 内容列；断点 1100/768/480）
+Design given: 新中式宴会厅 + 客家粤式围餐；红金暖光、对称仪式感；底色 #17110E，主红 #9E2B2B，金 #C9A227
+Asset map:
+  [@image:#1 hall_hero 1920×1088] -> Hero 满幅背景（100vh, cover, object-position center 62% 居中偏下）；品牌故事区低透明背景 opacity 0.18
+  [@image:#2 table_detail 1088×1440 (3:4)] -> 宴会场地右栏 3:4 竖 slot（cover, 焦点中部偏上 center 38%），margin-bottom:-130px 溢出到下一区块
+  [@image:#3 yanjiji 1024×1024] -> 招牌菜左列上（1:1, cover）
+  [@image:#4 tofu 1024×1024]    -> 招牌菜左列下（1:1, cover）
+  [@image:#5 meicai 1024×1024]  -> 招牌菜中列通高（grid row span 2, cover, 焦点中心偏上 center 35%）
+  [@image:#6 soup 1024×1024]    -> 招牌菜右列下（1:1, cover）
+  [@image:#7 shrimp 1024×1024]  -> 招牌菜右列上（1:1, cover）
+  全部 object-fit:cover 约束在 slot 内，懒加载（Hero 除外）
+Palette: brief 具名 hex 全部落 :root 变量（见 styles.css）；footer 底 #120D0A 为 brief 指定
+Typography: 中文标题 Noto Serif SC 600/700；西文标题 Cormorant Garamond；正文 Noto Sans SC 300/400（衬线仅标题与菜名）
+Content map: 品牌名/Slogan/地址/电话/营业时间/招牌菜 5 道/信息格 4 项/评价 3 条 全部逐字取自 Pinned Content
+Assumptions:
+  - 菜单预览「每栏 5 道」受 Pinned 清单限制：热炒 8 道排 4+4，煲汤点心 5+6，茶水 3+3（不增删菜品）
+  - 导航「宴会场地/品牌故事/联系我们」为页内锚点 #banquet/#story/#contact
+  - Hero 用负 margin 让 TopBar+Nav 浮于其上，nav sticky 吸顶
+  - 移动菜单桌面端 display:none、≤900px 才启用（避免关闭按钮在桌面占位被检出）
+QA risks: 宴会图 -130px 溢出可能与招牌菜标题重叠（signature 已加 padding-top:200px）；dotted leader 基线对齐；移动端汉堡开合
+-->
+</head>
+<body>
+
+<!-- 1. TopBar -->
+<div class="site-topbar">
+  <div class="container">
+    <span>11:00 – 22:00 每日营业 Open Daily</span>
+    <a href="tel:0143689319">014-3689319</a>
+  </div>
+</div>
+
+<!-- Nav -->
+<header class="site-nav" id="siteNav">
+  <div class="container nav-inner">
+    <a class="brand" href="./index.html">
+      <span class="brand-cn">鲍山鲍海</span><br>
+      <span class="brand-en">Restoran BSBH</span>
+    </a>
+    <nav class="nav-links" aria-label="主导航">
+      <a class="nav-link active" href="./index.html">首页</a>
+      <a class="nav-link" href="./menu.html">菜单</a>
+      <a class="nav-link" href="#banquet">宴会场地</a>
+      <a class="nav-link" href="#story">品牌故事</a>
+      <a class="nav-link" href="#contact">联系我们</a>
+      <a class="nav-cta" href="./reservation.html">预订席位 Book a Table</a>
+    </nav>
+    <button class="hamburger" aria-label="打开菜单" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- 移动端全屏菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" aria-label="关闭菜单">&times;</button>
+  <a class="active" href="./index.html">首页</a>
+  <a href="./menu.html">菜单</a>
+  <a href="#banquet">宴会场地</a>
+  <a href="#story">品牌故事</a>
+  <a href="#contact">联系我们</a>
+  <a class="nav-cta" href="./reservation.html">预订席位 Book a Table</a>
+</div>
+
+<!-- 2. Hero -->
+<section class="hero">
+  <img class="hero-bg" src="https://a.lovart.ai/artifacts/agent/n89HXGcU8k2fFbUS.png" alt="鲍山鲍海宴会厅主视觉：红灯笼暖光下的中式宴会大厅">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <span class="eyebrow">Hakka · Cantonese · Banquet</span>
+    <h1 class="hero-title">鲍山鲍海</h1>
+    <p class="hero-latin">Restoran BSBH</p>
+    <p class="hero-slogan">山海入席 · 团圆成宴</p>
+    <p class="hero-slogan-en">Where the sea and mountains meet the table</p>
+    <div class="hero-actions">
+      <a class="btn btn-solid" href="./menu.html">查看菜单 View Menu</a>
+      <a class="btn btn-ghost" href="./reservation.html">预订席位 Reserve a Table</a>
+    </div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true">
+    <span>Scroll</span>
+    <span class="arrow"></span>
+  </div>
+</section>
+
+<!-- 3. 引言条 -->
+<section class="leadin reveal">
+  <div class="leadin-inner">
+    <span class="leadin-line" aria-hidden="true"></span>
+    <div>
+      <p class="leadin-cn">客家老味道，粤式好食材，<br>芙蓉在地人办宴的地方。</p>
+      <p class="leadin-en">Old Hakka flavours, fine Cantonese ingredients — the place Seremban locals hold their banquets.</p>
+    </div>
+    <span class="leadin-line" aria-hidden="true"></span>
+  </div>
+</section>
+
+<!-- 4. 宴会场地（用户要求放在很前面） -->
+<section class="section banquet" id="banquet">
+  <div class="container">
+    <div class="banquet-grid">
+      <div class="banquet-text reveal">
+        <span class="eyebrow">Banquet Hall</span>
+        <h2 class="section-title">大宴小聚，皆有排场</h2>
+        <div class="ornament"><span class="diamond"></span></div>
+        <div class="banquet-copy">
+          <p>鲍山鲍海宴会厅可容纳 40 桌，两厅房独立或连通使用，红灯笼、圆桌、瓦煲热气——婚宴、寿宴、满月酒、公司春茗与团体围餐，都有相应的排场与流程。</p>
+          <p>From weddings and birthdays to corporate dinners, our halls host up to 40 tables with full banquet service, décor and staging handled by our team.</p>
+        </div>
+        <div class="banquet-facts">
+          <div class="fact-cell">
+            <div class="fact-cn">可容纳 40 桌</div>
+            <div class="fact-en">Up to 40 Tables</div>
+          </div>
+          <div class="fact-cell">
+            <div class="fact-cn">两厅房可选</div>
+            <div class="fact-en">Two Halls Available</div>
+          </div>
+          <div class="fact-cell">
+            <div class="fact-cn">婚宴布置</div>
+            <div class="fact-en">Wedding Décor Included</div>
+          </div>
+          <div class="fact-cell">
+            <div class="fact-cn">泊车方便</div>
+            <div class="fact-en">Ample Parking</div>
+          </div>
+        </div>
+        <a class="banquet-link" href="./reservation.html">了解宴席详情 →</a>
+      </div>
+      <div class="banquet-media reveal">
+        <div class="banquet-frame">
+          <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/u6h8Dgjx03Hwz1c4.png" alt="宴会圆桌细节：暖光下的中式圆桌布置">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. 招牌菜 -->
+<section class="section signature" id="signature">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Signature</span>
+      <h2 class="section-title">招牌必点</h2>
+      <div class="ornament"><span class="diamond"></span></div>
+    </div>
+    <div class="dishes-grid reveal">
+      <figure class="dish-card d-yanjiji">
+        <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/m5GP8zmsK0KVuROV.png" alt="客家盐焗手撕鸡">
+        <figcaption class="dish-info">
+          <div class="d-name">客家盐焗手撕鸡</div>
+          <div class="d-en">Hakka Salt-Baked Chicken</div>
+          <div class="d-price">RM 48</div>
+        </figcaption>
+      </figure>
+      <figure class="dish-card dish-tall d-meicai">
+        <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/LJrTTeXYaca8eaRF.png" alt="梅菜扣肉">
+        <figcaption class="dish-info">
+          <div class="d-name">梅菜扣肉</div>
+          <div class="d-en">Braised Pork Belly with Preserved Mustard</div>
+          <div class="d-price">RM 58</div>
+        </figcaption>
+      </figure>
+      <figure class="dish-card d-shrimp">
+        <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/gc9Yy4EaeoIlv2gJ.png" alt="广式水晶虾饺">
+        <figcaption class="dish-info">
+          <div class="d-name">广式水晶虾饺</div>
+          <div class="d-en">Steamed Crystal Shrimp Dumplings</div>
+          <div class="d-price">RM 18</div>
+        </figcaption>
+      </figure>
+      <figure class="dish-card d-tofu">
+        <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/6d0oLzRZIxF9UeVU.png" alt="客家酿豆腐">
+        <figcaption class="dish-info">
+          <div class="d-name">客家酿豆腐</div>
+          <div class="d-en">Stuffed Hakka Tofu</div>
+          <div class="d-price">RM 32</div>
+        </figcaption>
+      </figure>
+      <figure class="dish-card d-soup">
+        <img loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/wn5tg3T1sZIwxRiH.png" alt="瓦煲老火靓汤">
+        <figcaption class="dish-info">
+          <div class="d-name">瓦煲老火靓汤</div>
+          <div class="d-en">Claypot Slow-Cooked Soup</div>
+          <div class="d-price">RM 38（每盅）</div>
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- 6. 菜单预览 -->
+<section class="section section-alt" id="menuPreview">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Menu Preview</span>
+      <h2 class="section-title">菜单预览</h2>
+      <div class="ornament"><span class="diamond"></span></div>
+    </div>
+    <div class="preview-tabs reveal" role="tablist" aria-label="菜单分类">
+      <button class="preview-tab active" data-tab="hot" role="tab" aria-selected="true">热炒</button>
+      <button class="preview-tab" data-tab="soupdim" role="tab" aria-selected="false">煲汤点心</button>
+      <button class="preview-tab" data-tab="tea" role="tab" aria-selected="false">茶水</button>
+    </div>
+
+    <!-- 热炒 -->
+    <div class="preview-panel active" data-panel="hot" role="tabpanel">
+      <div class="preview-columns">
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">客家盐焗手撕鸡</span><span class="dish-en">Hakka Salt-Baked Pulled Chicken</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 48</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">梅菜扣肉</span><span class="dish-en">Braised Pork Belly with Preserved Mustard</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 58</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">客家酿豆腐</span><span class="dish-en">Stuffed Hakka Tofu</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 32</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">豉椒炒蜆</span><span class="dish-en">Stir-Fried Clams with Black Bean Chili</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 36</span>
+            </div>
+          </li>
+        </ul>
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">蜜汁叉烧</span><span class="dish-en">Honey Glazed Char Siu</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 46</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">清蒸石斑鱼</span><span class="dish-en">Steamed Grouper with Soy</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 88 起</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">蒜蓉炒时蔬</span><span class="dish-en">Wok-Fried Greens with Garlic</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 20</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">咸鱼茄子煲</span><span class="dish-en">Claypot Eggplant with Salted Fish</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 30</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 煲汤点心 -->
+    <div class="preview-panel" data-panel="soupdim" role="tabpanel">
+      <div class="preview-columns">
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">瓦煲老火靓汤</span><span class="dish-en">Claypot Slow-Cooked Soup</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 38（每盅）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">萝卜猪骨汤</span><span class="dish-en">Radish and Pork Bone Soup</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 36（每盅）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">虫草花炖鸡汤</span><span class="dish-en">Double-Boiled Chicken with Cordyceps Flower</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 42（每位）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">冬瓜薏米煲水鸭</span><span class="dish-en">Winter Melon and Barley Duck Soup</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 40（每盅）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">紫菜蛋花汤</span><span class="dish-en">Seaweed and Egg Drop Soup</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 18（小）/ RM 38（大）</span>
+            </div>
+          </li>
+        </ul>
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">广式水晶虾饺</span><span class="dish-en">Steamed Crystal Shrimp Dumplings</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 18</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">豉汁蒸凤爪</span><span class="dish-en">Steamed Chicken Feet in Black Bean Sauce</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 16</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">香煎芋丝糕</span><span class="dish-en">Pan-Fried Taro Cake</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 15</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">手工流沙包</span><span class="dish-en">Lava Custard Buns</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 14</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">客家算盘子</span><span class="dish-en">Hakka Cassava Balls</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 16</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">虾米肠粉</span><span class="dish-en">Rice Noodle Rolls with Dried Shrimp</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 17</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 茶水 -->
+    <div class="preview-panel" data-panel="tea" role="tabpanel">
+      <div class="preview-columns">
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">普洱功夫茶</span><span class="dish-en">Pu'er Gongfu Tea</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 12（每位）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">菊花普洱茶</span><span class="dish-en">Chrysanthemum Pu'er</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 10（每位）</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">冰镇柠檬蜜</span><span class="dish-en">Iced Lemon Honey</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 9</span>
+            </div>
+          </li>
+        </ul>
+        <ul class="dish-list">
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">椰子皇</span><span class="dish-en">Young Coconut Water</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 15</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">热米浆</span><span class="dish-en">Warm Rice Milk</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 8</span>
+            </div>
+          </li>
+          <li>
+            <div class="dish-row">
+              <div class="dish-main"><span class="dish-name">咸柠七</span><span class="dish-en">Salted Lemon Seven Up</span></div>
+              <span class="dish-leader"></span><span class="dish-price">RM 10</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview-more reveal">
+      <a class="btn btn-ghost" href="./menu.html">查看完整菜单 Full Menu</a>
+    </div>
+  </div>
+</section>
+
+<!-- 7. 品牌故事 -->
+<section class="section story" id="story">
+  <img class="story-bg" loading="lazy" decoding="async" decoding="async" src="https://a.lovart.ai/artifacts/agent/n89HXGcU8k2fFbUS.png" alt="" aria-hidden="true">
+  <div class="container">
+    <div class="story-inner reveal">
+      <span class="story-quote-mark" aria-hidden="true">「</span>
+      <p class="story-cn">从客家老灶的一口瓦煲，到芙蓉 Oakland 的这间宴会厅，三代人守的是同一件事：汤要慢火，豆腐要手酿，扣肉要蒸足时辰。山海入席，靠的不是排场，是几十年没有变过的做法。</p>
+      <p class="story-en">From an old Hakka stove to this banquet hall in Seremban, three generations have kept one promise: soups simmered slowly, tofu stuffed by hand, pork belly steamed for hours. What lands on your table is craft that has not changed in decades.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8. 顾客评价 -->
+<section class="section section-alt" id="testimonials">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Kind Words</span>
+      <h2 class="section-title">食客怎么说</h2>
+      <div class="ornament"><span class="diamond"></span></div>
+    </div>
+    <div class="testimonials-grid reveal">
+      <div class="t-card">
+        <span class="t-mark" aria-hidden="true">”</span>
+        <p class="t-text">「办春茗订了这里，四十桌一气呵成，服务员比我想的还细心。」</p>
+        <div class="t-author">
+          <div class="t-name">陈先生</div>
+          <div class="t-role">企业客户 / Mr. Chan, Corporate Client</div>
+        </div>
+      </div>
+      <div class="t-card">
+        <span class="t-mark" aria-hidden="true">”</span>
+        <p class="t-text">「梅菜扣肉是我在芙蓉吃过最接近阿嬷手艺的一道。」</p>
+        <div class="t-author">
+          <div class="t-name">李小姐</div>
+          <div class="t-role">Ms. Lee</div>
+        </div>
+      </div>
+      <div class="t-card">
+        <span class="t-mark" aria-hidden="true">”</span>
+        <p class="t-text">「父亲八十大寿在这里摆酒，红灯笼一亮，全家都说气派。」</p>
+        <div class="t-author">
+          <div class="t-name">王先生</div>
+          <div class="t-role">Mr. Wong</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. 预订 CTA 条 -->
+<section class="cta-band reveal">
+  <h2 class="cta-title">设宴之前，先订一席</h2>
+  <p class="cta-en">Reserve your table before the banquet begins.</p>
+  <a class="btn btn-cream" href="./reservation.html">立即预订 Book Now</a>
+  <p class="cta-phone">或致电 Or call <a href="tel:0143689319">014-3689319</a></p>
+</section>
+
+<!-- 10. Footer -->
+<footer class="site-footer" id="contact">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="footer-brand-cn">鲍山鲍海</div>
+        <div class="footer-brand-en">Restoran BSBH</div>
+        <p class="footer-about">客家菜 · 中国菜 · 粤菜。芙蓉 Oakland Industrial Park 的大型中式宴会厅，婚宴、寿宴、春茗、围餐皆可承办。</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-h">营业时间与地址 Hours & Address</h4>
+        <p>11:00 – 22:00（每日营业 Open Daily）</p>
+        <p>1814 &amp; 1816, Jln Haruan 2,<br>Oakland Industrial Park,<br>70300 Seremban, Negeri Sembilan</p>
+      </div>
+      <div class="footer-col">
+        <h4 class="footer-h">联系方式 Contact</h4>
+        <p>电话 Tel：<a href="tel:0143689319">014-3689319</a></p>
+        <p>WhatsApp：<a href="https://wa.me/60143689319" target="_blank" rel="noopener">014-3689319</a></p>
+        <p><a href="#contact">Facebook</a> · <a href="#contact">Instagram</a></p>
+      </div>
+    </div>
+    <div class="footer-legal">
+      <span>© 2026 鲍山鲍海餐饮 Restoran BSBH. All rights reserved.</span>
+      <span>菜单价格如有调整，恕不另行通知 / Prices subject to change.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="./script.js"></script>
+</body>
+</html>
