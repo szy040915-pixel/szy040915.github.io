@@ -1,1 +1,1 @@
-# szy040915.github.io
+# szy.github.io
